@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Management Webapp</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        /* Custom Styles */
+
+        /* Wrapper */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar Styles */
+        #sidebar-wrapper {
+            min-width: 250px;
+            max-width: 250px;
+            background-color: #343a40;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        #wrapper.toggled #sidebar-wrapper {
+            margin-left: -250px;
+        }
+
+        #sidebar-wrapper .sidebar-heading {
+            padding: 20px;
+            font-size: 1.5rem;
+            text-align: center;
+            background-color: #23272b;
+        }
+
+        #sidebar-wrapper .list-group-item {
+            background-color: #343a40;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            transition: background-color 0.2s;
+        }
+
+        #sidebar-wrapper .list-group-item:hover, #sidebar-wrapper .list-group-item.active {
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        /* Page Content Styles */
+        #page-content-wrapper {
+            width: 100%;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #1abc9c !important;
+        }
+
+        .navbar-toggler {
+            border: none;
+            color: #1abc9c;
+        }
+
+        /* Active Section */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Table Styles */
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        /* Accordion Styles */
+        .accordion-button:focus {
+            box-shadow: none;
+        }
+
+        /* Form Styles */
+        .form-label {
+            font-weight: bold;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            #sidebar-wrapper {
+                margin-left: -250px;
+            }
+
+            #wrapper.toggled #sidebar-wrapper {
+                margin-left: 0;
+            }
+
+            #page-content-wrapper {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar-wrapper">
+            <div class="sidebar-heading">
+                <i class="fas fa-user-circle me-2"></i>Membership
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="#" class="list-group-item list-group-item-action active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+                <!-- Member Management -->
+                <a href="#memberManagementSubmenu" class="list-group-item list-group-item-action" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-users me-2"></i>Member Management
+                </a>
+                <div class="collapse" id="memberManagementSubmenu">
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="membershipLevels">
+                        <i class="fas fa-level-up-alt me-2"></i>Membership Levels
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="memberInformation">
+                        <i class="fas fa-info-circle me-2"></i>Member Information
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="memberSegments">
+                        <i class="fas fa-object-group me-2"></i>Member Segments
+                    </a>
+                </div>
+                <!-- Communication -->
+                <a href="#communicationSubmenu" class="list-group-item list-group-item-action" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-comments me-2"></i>Communication
+                </a>
+                <div class="collapse" id="communicationSubmenu">
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="mailchimpIntegration">
+                        <i class="fas fa-envelope me-2"></i>Mailchimp Integration
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="smsManagement">
+                        <i class="fas fa-sms me-2"></i>SMS Management
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="appPushManagement">
+                        <i class="fas fa-bell me-2"></i>App Push Management
+                    </a>
+                </div>
+                <!-- Promotion Management -->
+                <a href="#promotionManagementSubmenu" class="list-group-item list-group-item-action" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-tags me-2"></i>Promotion Management
+                </a>
+                <div class="collapse" id="promotionManagementSubmenu">
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="couponsVouchers">
+                        <i class="fas fa-ticket-alt me-2"></i>Coupons/Vouchers
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="campaigns">
+                        <i class="fas fa-bullhorn me-2"></i>Campaigns
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="rewardProgram">
+                        <i class="fas fa-gift me-2"></i>Reward Program
+                    </a>
+                </div>
+                <!-- Analysis/Reporting -->
+                <a href="#analysisReportingSubmenu" class="list-group-item list-group-item-action" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-chart-line me-2"></i>Analysis/Reporting
+                </a>
+                <div class="collapse" id="analysisReportingSubmenu">
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="memberAnalysis">
+                        <i class="fas fa-user-chart me-2"></i>Member Analysis
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="marketingPerformance">
+                        <i class="fas fa-bullseye me-2"></i>Marketing Performance
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="salesAnalysis">
+                        <i class="fas fa-dollar-sign me-2"></i>Sales Analysis
+                    </a>
+                </div>
+                <!-- System Management -->
+                <a href="#systemManagementSubmenu" class="list-group-item list-group-item-action" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-cogs me-2"></i>System Management
+                </a>
+                <div class="collapse" id="systemManagementSubmenu">
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="adminSettings">
+                        <i class="fas fa-user-cog me-2"></i>Admin Settings
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action ps-5" data-section="systemMonitoring">
+                        <i class="fas fa-tachometer-alt-fast me-2"></i>System Monitoring
+                    </a>
+                </div>
+                <!-- Support & Resources -->
+                <a href="#" class="list-group-item list-group-item-action" data-section="supportResources">
+                    <i class="fas fa-life-ring me-2"></i>Support & Resources
+                </a>
+            </div>
+        </nav>
+        <!-- /#sidebar-wrapper -->
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper">
+            <!-- Top Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <a class="navbar-brand ms-3" href="#">Membership Management</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-2"></i>Admin
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-cogs me-2"></i>Settings</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <div class="container-fluid">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <h1 class="mt-4"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+                    <p>Welcome to the Dashboard. Here you can view an overview of your membership statistics and key metrics.</p>
+                    <!-- Example Widgets -->
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card text-white bg-primary h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-users fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Total Members</h5>
+                                        <h3 class="card-text">1,234</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card text-white bg-success h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-dollar-sign fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Revenue</h5>
+                                        <h3 class="card-text">$56,789</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card text-white bg-warning h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-chart-line fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Growth Rate</h5>
+                                        <h3 class="card-text">12%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-4">
+                            <div class="card text-white bg-danger h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Churn Rate</h5>
+                                        <h3 class="card-text">5%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Example Charts -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-pie me-2"></i>Membership Levels Distribution
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="membershipLevelsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-2"></i>Monthly Revenue
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="monthlyRevenueChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Membership Levels Section -->
+                <div id="membershipLevels" class="section">
+                    <h1 class="mt-4"><i class="fas fa-level-up-alt me-2"></i>Membership Levels</h1>
+                    <p>Define and manage membership levels, benefits, and upgrade/downgrade rules.</p>
+                    <!-- Example Table -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Add New Level</button>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>Discount Rate</th>
+                                <th>Point Accrual Rate</th>
+                                <th>Special Services</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bronze</td>
+                                <td>5%</td>
+                                <td>1 point per $1</td>
+                                <td>Basic Support</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Silver</td>
+                                <td>10%</td>
+                                <td>1.5 points per $1</td>
+                                <td>Priority Support</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more levels as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Member Information Section -->
+                <div id="memberInformation" class="section">
+                    <h1 class="mt-4"><i class="fas fa-info-circle me-2"></i>Member Information</h1>
+                    <p>View and manage member profiles, purchase history, and rewards.</p>
+                    <!-- Example Search and Table -->
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Search Members...">
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Member ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Level</th>
+                                <th>Points</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>001</td>
+                                <td>John Doe</td>
+                                <td>johndoe@example.com</td>
+                                <td>Silver</td>
+                                <td>1500</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>002</td>
+                                <td>Jane Smith</td>
+                                <td>janesmith@example.com</td>
+                                <td>Gold</td>
+                                <td>2500</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more members as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Member Segments Section -->
+                <div id="memberSegments" class="section">
+                    <h1 class="mt-4"><i class="fas fa-object-group me-2"></i>Member Segments</h1>
+                    <p>Create and manage custom segments based on member behavior, preferences, and demographics.</p>
+                    <!-- Example Segments List -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Create New Segment</button>
+                    </div>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Frequent Buyers
+                            <span>
+                                <button class="btn btn-sm btn-primary me-2"><i class="fas fa-edit me-1"></i>Edit</button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            High Spenders
+                            <span>
+                                <button class="btn btn-sm btn-primary me-2"><i class="fas fa-edit me-1"></i>Edit</button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Eco-Friendly Lifestyle
+                            <span>
+                                <button class="btn btn-sm btn-primary me-2"><i class="fas fa-edit me-1"></i>Edit</button>
+                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                            </span>
+                        </li>
+                        <!-- Add more segments as needed -->
+                    </ul>
+                </div>
+
+                <!-- Mailchimp Integration Section -->
+                <div id="mailchimpIntegration" class="section">
+                    <h1 class="mt-4"><i class="fas fa-envelope me-2"></i>Mailchimp Integration</h1>
+                    <p>Configure and manage your Mailchimp integration to automate email campaigns.</p>
+                    <!-- Example Form -->
+                    <form>
+                        <div class="mb-3">
+                            <label for="apiKey" class="form-label">API Key</label>
+                            <input type="text" class="form-control" id="apiKey" placeholder="Enter Mailchimp API Key">
+                        </div>
+                        <div class="mb-3">
+                            <label for="audienceId" class="form-label">Audience ID</label>
+                            <input type="text" class="form-control" id="audienceId" placeholder="Enter Mailchimp Audience ID">
+                        </div>
+                        <div class="mb-3">
+                            <label for="apiLimit" class="form-label">API Request Limit</label>
+                            <input type="number" class="form-control" id="apiLimit" placeholder="Enter API Request Limit">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Save Configuration</button>
+                    </form>
+                </div>
+
+                <!-- SMS Management Section -->
+                <div id="smsManagement" class="section">
+                    <h1 class="mt-4"><i class="fas fa-sms me-2"></i>SMS Management</h1>
+                    <p>Manage your SMS campaigns to engage with members via text messages.</p>
+                    <!-- Example SMS Interface -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Send New SMS</button>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>SMS ID</th>
+                                <th>Message</th>
+                                <th>Recipients</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>SMS001</td>
+                                <td>Welcome to our membership program!</td>
+                                <td>1,234</td>
+                                <td>Sent</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more SMS records as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- App Push Management Section -->
+                <div id="appPushManagement" class="section">
+                    <h1 class="mt-4"><i class="fas fa-bell me-2"></i>App Push Management</h1>
+                    <p>Configure and send push notifications to your members via the mobile app.</p>
+                    <!-- Example Push Notification Interface -->
+                    <form>
+                        <div class="mb-3">
+                            <label for="pushTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="pushTitle" placeholder="Enter Push Notification Title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="pushMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="pushMessage" rows="3" placeholder="Enter Push Notification Message"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pushTarget" class="form-label">Target Audience</label>
+                            <select class="form-select" id="pushTarget">
+                                <option selected>Select Audience</option>
+                                <option value="1">All Members</option>
+                                <option value="2">Silver Members</option>
+                                <option value="3">High Spenders</option>
+                                <!-- Add more options as needed -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pushSchedule" class="form-label">Schedule</label>
+                            <input type="datetime-local" class="form-control" id="pushSchedule">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>Send Push</button>
+                    </form>
+                </div>
+
+                <!-- Coupons/Vouchers Section -->
+                <div id="couponsVouchers" class="section">
+                    <h1 class="mt-4"><i class="fas fa-ticket-alt me-2"></i>Coupons/Vouchers</h1>
+                    <p>Create and manage coupons and vouchers to offer discounts and incentives to your members.</p>
+                    <!-- Example Coupons Table -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Create New Coupon</button>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Coupon ID</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Expiration</th>
+                                <th>Usage Limit</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CPN001</td>
+                                <td>Percentage</td>
+                                <td>10%</td>
+                                <td>2024-12-31</td>
+                                <td>Unlimited</td>
+                                <td>Active</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CPN002</td>
+                                <td>Fixed</td>
+                                <td>$20</td>
+                                <td>2024-06-30</td>
+                                <td>100</td>
+                                <td>Active</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more coupons as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Campaigns Section -->
+                <div id="campaigns" class="section">
+                    <h1 class="mt-4"><i class="fas fa-bullhorn me-2"></i>Campaigns</h1>
+                    <p>Create and manage marketing campaigns to promote your products and engage members.</p>
+                    <!-- Example Campaigns Interface -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Create New Campaign</button>
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Campaign ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CMP001</td>
+                                <td>Summer Sale</td>
+                                <td>Seasonal</td>
+                                <td>2024-07-01</td>
+                                <td>2024-07-31</td>
+                                <td>Active</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>CMP002</td>
+                                <td>Holiday Discounts</td>
+                                <td>Holiday</td>
+                                <td>2024-12-01</td>
+                                <td>2024-12-31</td>
+                                <td>Upcoming</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info"><i class="fas fa-eye me-1"></i>View</button>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more campaigns as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Reward Program Section -->
+                <div id="rewardProgram" class="section">
+                    <h1 class="mt-4"><i class="fas fa-gift me-2"></i>Reward Program</h1>
+                    <p>Manage reward programs to incentivize member engagement and loyalty.</p>
+                    <!-- Example Reward Program Interface -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Create New Reward Program</button>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Program ID</th>
+                                <th>Name</th>
+                                <th>Point Accrual</th>
+                                <th>Rewards Offered</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>RWD001</td>
+                                <td>Referral Program</td>
+                                <td>2 points per referral</td>
+                                <td>Discount Coupons, Free Shipping</td>
+                                <td>Active</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>RWD002</td>
+                                <td>Annual Loyalty</td>
+                                <td>1 point per $1 spent</td>
+                                <td>Exclusive Offers, VIP Access</td>
+                                <td>Upcoming</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more reward programs as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Member Analysis Section -->
+                <div id="memberAnalysis" class="section">
+                    <h1 class="mt-4"><i class="fas fa-user-chart me-2"></i>Member Analysis</h1>
+                    <p>Analyze member levels, purchase patterns, and customer value to optimize your membership strategies.</p>
+                    <!-- Example Charts -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-pie me-2"></i>Membership Levels Distribution
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="membershipLevelsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-2"></i>Purchase Patterns
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="purchasePatternsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marketing Performance Section -->
+                <div id="marketingPerformance" class="section">
+                    <h1 class="mt-4"><i class="fas fa-bullseye me-2"></i>Marketing Performance</h1>
+                    <p>Evaluate the effectiveness of your marketing campaigns across different channels.</p>
+                    <!-- Example Charts -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line me-2"></i>Campaign ROI
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="campaignROIChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-pie me-2"></i>Channel Performance
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="channelPerformanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Analysis Section -->
+                <div id="salesAnalysis" class="section">
+                    <h1 class="mt-4"><i class="fas fa-dollar-sign me-2"></i>Sales Analysis</h1>
+                    <p>Monitor product sales, promotion effectiveness, and overall revenue trends.</p>
+                    <!-- Example Charts -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-bar me-2"></i>Product Sales
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="productSalesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line me-2"></i>Revenue Trends
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="revenueTrendsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Settings Section -->
+                <div id="adminSettings" class="section">
+                    <h1 class="mt-4"><i class="fas fa-user-cog me-2"></i>Admin Settings</h1>
+                    <p>Manage user permissions, API integrations, and other administrative configurations.</p>
+                    <!-- Example Permissions Management -->
+                    <div class="mb-3">
+                        <button class="btn btn-success"><i class="fas fa-plus me-2"></i>Add New Admin</button>
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Permissions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ADM001</td>
+                                <td>Alice Johnson</td>
+                                <td>Super Admin</td>
+                                <td>All Permissions</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ADM002</td>
+                                <td>Bob Smith</td>
+                                <td>Staff</td>
+                                <td>Limited Permissions</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-edit me-1"></i>Edit</button>
+                                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash-alt me-1"></i>Delete</button>
+                                </td>
+                            </tr>
+                            <!-- Add more admins as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- System Monitoring Section -->
+                <div id="systemMonitoring" class="section">
+                    <h1 class="mt-4"><i class="fas fa-tachometer-alt-fast me-2"></i>System Monitoring</h1>
+                    <p>Monitor system performance, API response times, and user activity logs.</p>
+                    <!-- Example Monitoring Metrics -->
+                    <div class="row">
+                        <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-info h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-server fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Server Uptime</h5>
+                                        <h3 class="card-text">99.9%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-warning h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-network-wired fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">API Response Time</h5>
+                                        <h3 class="card-text">350ms</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-danger h-100">
+                                <div class="card-body d-flex align-items-center">
+                                    <i class="fas fa-exclamation-triangle fa-3x me-3"></i>
+                                    <div>
+                                        <h5 class="card-title">Error Rate</h5>
+                                        <h3 class="card-text">0.2%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Example Logs Table -->
+                    <h4>Recent Activity Logs</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Activity</th>
+                                <th>User</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-04-27 10:15 AM</td>
+                                <td>Login</td>
+                                <td>Alice Johnson</td>
+                                <td>Success</td>
+                            </tr>
+                            <tr>
+                                <td>2024-04-27 10:20 AM</td>
+                                <td>API Call: Fetch Members</td>
+                                <td>System</td>
+                                <td>Success</td>
+                            </tr>
+                            <tr>
+                                <td>2024-04-27 10:25 AM</td>
+                                <td>Logout</td>
+                                <td>Bob Smith</td>
+                                <td>Success</td>
+                            </tr>
+                            <!-- Add more logs as needed -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Support & Resources Section -->
+                <div id="supportResources" class="section">
+                    <h1 class="mt-4"><i class="fas fa-life-ring me-2"></i>Support & Resources</h1>
+                    <p>Access help documentation, user guides, and contact support.</p>
+                    <!-- Tabs for Support -->
+                    <ul class="nav nav-tabs" id="supportResourcesTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="faq-tab" data-bs-toggle="tab" data-bs-target="#faq-content" type="button" role="tab" aria-controls="faq-content" aria-selected="true">
+                                <i class="fas fa-question-circle me-2"></i>FAQ
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="userGuides-tab" data-bs-toggle="tab" data-bs-target="#userGuides-content" type="button" role="tab" aria-controls="userGuides-content" aria-selected="false">
+                                <i class="fas fa-book me-2"></i>User Guides
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="support-tab" data-bs-toggle="tab" data-bs-target="#support-content" type="button" role="tab" aria-controls="support-content" aria-selected="false">
+                                <i class="fas fa-headset me-2"></i>Contact Support
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="supportResourcesTabContent">
+                        <!-- FAQ -->
+                        <div class="tab-pane fade show active p-3" id="faq-content" role="tabpanel" aria-labelledby="faq-tab">
+                            <h3><i class="fas fa-question-circle me-2"></i>Frequently Asked Questions</h3>
+                            <!-- Example Accordion -->
+                            <div class="accordion" id="faqAccordion">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHeadingOne">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqOne" aria-expanded="true" aria-controls="faqOne">
+                                            How do I register as a new member?
+                                        </button>
+                                    </h2>
+                                    <div id="faqOne" class="accordion-collapse collapse show" aria-labelledby="faqHeadingOne" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            Click on the "Register" button on the top right corner, fill in your details, and submit the form to create a new membership account.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHeadingTwo">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqTwo" aria-expanded="false" aria-controls="faqTwo">
+                                            How can I update my personal information?
+                                        </button>
+                                    </h2>
+                                    <div id="faqTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">
+                                            Navigate to "Member Information" under "Member Management" and click on the "Edit" button next to your profile to update your personal details.
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Add more FAQs as needed -->
+                            </div>
+                        </div>
+                        <!-- User Guides -->
+                        <div class="tab-pane fade p-3" id="userGuides-content" role="tabpanel" aria-labelledby="userGuides-tab">
+                            <h3><i class="fas fa-book me-2"></i>User Guides</h3>
+                            <p>Access comprehensive guides to help you navigate and utilize the Membership Management Webapp effectively.</p>
+                            <!-- Example Guides List -->
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <a href="#" class="text-decoration-none"><i class="fas fa-file-alt me-2"></i>Getting Started Guide</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="#" class="text-decoration-none"><i class="fas fa-file-alt me-2"></i>Managing Membership Levels</a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="#" class="text-decoration-none"><i class="fas fa-file-alt me-2"></i>Creating Campaigns</a>
+                                </li>
+                                <!-- Add more guides as needed -->
+                            </ul>
+                        </div>
+                        <!-- Contact Support -->
+                        <div class="tab-pane fade p-3" id="support-content" role="tabpanel" aria-labelledby="support-tab">
+                            <h3><i class="fas fa-headset me-2"></i>Contact Support</h3>
+                            <p>If you need assistance, please reach out to our support team using the form below.</p>
+                            <!-- Example Support Form -->
+                            <form>
+                                <div class="mb-3">
+                                    <label for="supportName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="supportName" placeholder="Enter your name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="supportEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="supportEmail" placeholder="Enter your email">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="supportMessage" class="form-label">Message</label>
+                                    <textarea class="form-control" id="supportMessage" rows="5" placeholder="Enter your message"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-2"></i>Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /#page-content-wrapper -->
+        </div>
+        <!-- /#wrapper -->
+
+        <!-- Bootstrap JS Bundle -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Custom JS -->
+        <script>
+            // scripts.js
+
+            // Toggle the sidebar
+            document.getElementById("menu-toggle").addEventListener("click", function () {
+                document.getElementById("wrapper").classList.toggle("toggled");
+            });
+
+            // Function to handle section switching
+            const menuItems = document.querySelectorAll('[data-section]');
+            const sections = document.querySelectorAll('.section');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-section');
+
+                    // Remove active class from all menu items
+                    menuItems.forEach(item => item.classList.remove('active'));
+
+                    // Add active class to the clicked menu item
+                    this.classList.add('active');
+
+                    // Hide all sections
+                    sections.forEach(section => section.classList.remove('active'));
+
+                    // Show the target section
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+
+            // Handle Support & Resources menu item separately
+            const supportResourcesItem = document.querySelector('[data-section="supportResources"]');
+            supportResourcesItem.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Remove active class from all menu items
+                menuItems.forEach(item => item.classList.remove('active'));
+
+                // Add active class to the clicked menu item
+                this.classList.add('active');
+
+                // Hide all sections
+                sections.forEach(section => section.classList.remove('active'));
+
+                // Show the Support & Resources section
+                document.getElementById('supportResources').classList.add('active');
+            });
+
+            // Initialize Charts using Chart.js when sections become active
+            function initializeCharts() {
+                // Membership Levels Distribution Chart
+                if (document.getElementById('membershipLevelsChart')) {
+                    var ctx1 = document.getElementById('membershipLevelsChart').getContext('2d');
+                    var membershipLevelsChart = new Chart(ctx1, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Bronze', 'Silver', 'Gold', 'Platinum'],
+                            datasets: [{
+                                data: [500, 400, 200, 134],
+                                backgroundColor: [
+                                    '#f6c23e',
+                                    '#1cc88a',
+                                    '#36b9cc',
+                                    '#4e73df'
+                                ],
+                                hoverBackgroundColor: [
+                                    '#f6c23e',
+                                    '#1cc88a',
+                                    '#36b9cc',
+                                    '#4e73df'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Membership Levels Distribution'
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Monthly Revenue Chart
+                if (document.getElementById('monthlyRevenueChart')) {
+                    var ctx2 = document.getElementById('monthlyRevenueChart').getContext('2d');
+                    var monthlyRevenueChart = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: [12000, 15000, 17000, 14000, 18000, 19000, 22000],
+                                backgroundColor: '#4e73df',
+                                borderColor: '#2e59d9',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false,
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Monthly Revenue'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Purchase Patterns Chart
+                if (document.getElementById('purchasePatternsChart')) {
+                    var ctx3 = document.getElementById('purchasePatternsChart').getContext('2d');
+                    var purchasePatternsChart = new Chart(ctx3, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                            datasets: [{
+                                label: 'Purchases',
+                                data: [300, 500, 400, 600, 700, 800, 900],
+                                fill: false,
+                                borderColor: '#e74a3b',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Purchase Patterns'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Campaign ROI Chart
+                if (document.getElementById('campaignROIChart')) {
+                    var ctx4 = document.getElementById('campaignROIChart').getContext('2d');
+                    var campaignROIChart = new Chart(ctx4, {
+                        type: 'line',
+                        data: {
+                            labels: ['Campaign A', 'Campaign B', 'Campaign C', 'Campaign D'],
+                            datasets: [{
+                                label: 'ROI (%)',
+                                data: [150, 200, 180, 220],
+                                fill: false,
+                                borderColor: '#1cc88a',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Campaign ROI'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Channel Performance Chart
+                if (document.getElementById('channelPerformanceChart')) {
+                    var ctx5 = document.getElementById('channelPerformanceChart').getContext('2d');
+                    var channelPerformanceChart = new Chart(ctx5, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Email', 'SMS', 'Push Notifications', 'Social Media'],
+                            datasets: [{
+                                data: [60, 25, 10, 5],
+                                backgroundColor: [
+                                    '#36b9cc',
+                                    '#1cc88a',
+                                    '#4e73df',
+                                    '#f6c23e'
+                                ],
+                                hoverBackgroundColor: [
+                                    '#36b9cc',
+                                    '#1cc88a',
+                                    '#4e73df',
+                                    '#f6c23e'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Channel Performance'
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Product Sales Chart
+                if (document.getElementById('productSalesChart')) {
+                    var ctx6 = document.getElementById('productSalesChart').getContext('2d');
+                    var productSalesChart = new Chart(ctx6, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Product A', 'Product B', 'Product C', 'Product D'],
+                            datasets: [{
+                                label: 'Sales ($)',
+                                data: [30000, 20000, 15000, 10000],
+                                backgroundColor: '#f6c23e',
+                                borderColor: '#e74a3b',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: false,
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Product Sales'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        },
+                    });
+                }
+
+                // Revenue Trends Chart
+                if (document.getElementById('revenueTrendsChart')) {
+                    var ctx7 = document.getElementById('revenueTrendsChart').getContext('2d');
+                    var revenueTrendsChart = new Chart(ctx7, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: [12000, 15000, 17000, 14000, 18000, 19000, 22000],
+                                fill: false,
+                                borderColor: '#e74a3b',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: false,
+                                    text: 'Revenue Trends'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        },
+                    });
+                }
+            }
+
+            // Initialize charts when a section becomes active
+            document.querySelectorAll('.section').forEach(section => {
+                section.addEventListener('transitionend', function () {
+                    if (this.classList.contains('active')) {
+                        initializeCharts();
+                    }
+                });
+            });
+
+            // Initialize charts on page load if dashboard is active
+            window.onload = function() {
+                initializeCharts();
+            };
+        </script>
+    </body>
+</html>
